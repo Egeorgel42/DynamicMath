@@ -1,13 +1,19 @@
 #include "DynamicMath.hpp"
 
+static void	allocBuffer(unsigned char *&allocBuffer, size_t size)
+{
+	allocBuffer = (unsigned char *)malloc(size);
+	if (!allocBuffer)
+		throw std::bad_alloc();
+	bzero(allocBuffer, size);
+}
+
 static void	memshift(unsigned char *buf, size_t len)
 {
 	bool mem = false;
 	bool next_mem = false;
-	for (long long i = 0; i < (long long)len; i++)
+	for (long long i = 0; i < (long long)len; i++, mem = next_mem, next_mem = false)
 	{
-		mem = next_mem;
-		next_mem = false;
 		if (buf[i] % 2)
 			next_mem = true;
 		buf[i] >>= 1;
@@ -47,63 +53,100 @@ static size_t roundUp(size_t numToRound, size_t multiple)
     return numToRound + multiple - remainder;
 }
 
-static void getSign(char **str, bool &negative)
+static void getSign(std::string &str, bool &negative)
 {
-	if ((*str)[0] == '-')
+	if (str[0] == '-')
 	{
 		negative = true;
-		(*str)++;
+		str.erase(0, 1);
 	}
-	else if ((*str)[0] == '+')
-		(*str)++;
+	else if (str[0] == '+')
+		str.erase(0, 1);
 }
 
-static void charToBinary(char **str, unsigned char *data, uint64_t size)
+static void charToBinary(std::string &str, unsigned char *data, uint64_t size)
 {
-	int rem = 0;
-	int next_rem = 0;
+	int remainder = 0;
+	int next_remainder = 0;
 	char c;
-	for (int i = 0; (*str)[i]; i++)
+	for (size_t i = 0; i < str.size(); i++, remainder = next_remainder, next_remainder = 0)
 	{
-		rem = next_rem;
-		next_rem = 0;
-		c = (*str)[i] - '0';
+		c = str[i] - '0';
 		if (c % 2)
-			next_rem = 5;
-		(*str)[i] = c / 2 + rem + '0';
+			next_remainder = 5;
+		str[i] = c / 2 + remainder + '0';
 	}
 	memshift(data, size);
 	*data += (c % 2) * 128;
-	while (*(*str) == '0')
-		(*str)++;
+	while (str[0] == '0')
+		str.erase(0, 1);
+}
+
+static void	parse(std::string &str, uint64_t &comma, bool &negative, bool &decimal)
+{
+	getSign(str, negative);
+	std::regex reg(R"(\d+\.?\d*)");
+	if (!std::regex_match(str, reg))
+		throw std::invalid_argument("Argument doesn't fit the following charset: \"0-9\" and \".\"");
+	
+	std::string::iterator it;
+	it = std::find_if(str.begin(), str.end(), [](char c){return c != '0';});
+	if (it == str.end() && str.size() > 1)
+	{
+		str = "0";
+		return;
+	}
+	else
+		str.erase(str.begin(), it);
+	if ((it = std::find(str.begin(), str.end(), '.')) != str.end())
+	{
+		comma = it - str.begin();
+		size_t i = str.find_last_not_of('0');
+		if (i != str.size() && i != str.npos && i > comma)
+			str.erase(i+1);
+		else if (i == comma)
+		{
+			str.erase(i);
+			return;
+		}
+		decimal = true;
+		str.erase(it);
+	}
+}
+
+void	DynamicMath::parseString(std::string str)
+{
+	parse(str, comma, negative, decimal);
+	std::cout << str << std::endl;
+	std::cout << comma << std::endl;
+	std::cout << decimal << std::endl;
+	size_t len = str.size();
+	size = roundUp(floor(len / LOG10OF2) + 1, 8) / 8; //log10(number) / log10(2) = number of bits to allocate
+
+	allocBuffer(data, size);
+
+	uint64_t extrabits = size * 8;
+	for (;str.size(); extrabits--)
+		charToBinary(str, data, size);
+
+	for (;extrabits > 0; extrabits--)
+		memshift(data, size);
+
+	printBinary(data, size);
 }
 
 DynamicMath::DynamicMath(char *str)
 {
-	getSign(&str, negative);
-	size_t len = strlen(str);
-	size = roundUp(floor(len / LOG10OF2) + 1, 8) / 8;
-	data = (unsigned char *)malloc(size);
-	if (!data)
-		throw std::bad_alloc();
-	bzero(data, size);
-	uint64_t extrabits = size * 8;
-	while (*str)
-	{
-		if (*str < '0' || *str > '9')
-			throw std::invalid_argument("charset of string limited between 0 and 9");
-		charToBinary(&str, data, size);
-		extrabits--;
-	}
-	while (extrabits > 0)
-	{
-		memshift(data, size);
-		extrabits--;
-	}
-	printBinary(data, size);
+	parseString(str);
+}
+
+DynamicMath::DynamicMath(std::string str)
+{
+	parseString(str);
 }
 
 DynamicMath::~DynamicMath()
 {
-	free(data);
+	if (data)
+		free(data);
 }

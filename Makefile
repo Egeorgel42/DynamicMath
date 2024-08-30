@@ -2,7 +2,7 @@ CC = c++
 SRC = DynamicMath.cpp \
 testing.cpp
 OBJ = ${SRC:.cpp=.o}
-CFLAGS = -Wall -Werror -Wextra #-g -fsanitize=address
+CFLAGS = -Wall -Werror -Wextra -g -fsanitize=address
 NAME = DynamicTesting
 
 all: $(NAME)
