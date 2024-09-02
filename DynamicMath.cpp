@@ -1,57 +1,5 @@
 #include "DynamicMath.hpp"
-
-static void	allocBuffer(unsigned char *&allocBuffer, size_t size)
-{
-	allocBuffer = (unsigned char *)malloc(size);
-	if (!allocBuffer)
-		throw std::bad_alloc();
-	bzero(allocBuffer, size);
-}
-
-static void	memshift(unsigned char *buf, size_t len)
-{
-	bool mem = false;
-	bool next_mem = false;
-	for (long long i = 0; i < (long long)len; i++, mem = next_mem, next_mem = false)
-	{
-		if (buf[i] % 2)
-			next_mem = true;
-		buf[i] >>= 1;
-		if (mem)
-			buf[i] += 128;
-	}
-}
-
-static void	printBinary(unsigned char *data, size_t len)
-{
-	std::bitset<8> x;
-	for (size_t i = 0; i < len; i++)
-	{
-		x = data[i];
-		std::cout << x;
-	}
-	std::cout << std::endl;
-}
-
-static size_t floor(long double nbr)
-{
-	size_t buf = (size_t) nbr;
-	if ((long double) buf == nbr || nbr >= 0)
-		return buf;
-	return buf - 1;
-}
-
-static size_t roundUp(size_t numToRound, size_t multiple)
-{
-    if (multiple == 0)
-        return numToRound;
-
-    size_t remainder = numToRound % multiple;
-    if (remainder == 0)
-        return numToRound;
-
-    return numToRound + multiple - remainder;
-}
+#include "DynamicUtils.hpp"
 
 static void getSign(std::string &str, bool &negative)
 {
@@ -61,24 +9,6 @@ static void getSign(std::string &str, bool &negative)
 		str.erase(0, 1);
 	}
 	else if (str[0] == '+')
-		str.erase(0, 1);
-}
-
-static void charToBinary(std::string &str, unsigned char *data, uint64_t size)
-{
-	int remainder = 0;
-	int next_remainder = 0;
-	char c;
-	for (size_t i = 0; i < str.size(); i++, remainder = next_remainder, next_remainder = 0)
-	{
-		c = str[i] - '0';
-		if (c % 2)
-			next_remainder = 5;
-		str[i] = c / 2 + remainder + '0';
-	}
-	memshift(data, size);
-	*data += (c % 2) * 128;
-	while (str[0] == '0')
 		str.erase(0, 1);
 }
 
@@ -110,39 +40,92 @@ static void	parse(std::string &str, uint64_t &comma, bool &negative, bool &decim
 			return;
 		}
 		decimal = true;
+		comma = str.end() - it - 1;
 		str.erase(it);
 	}
 }
 
-void	DynamicMath::parseString(std::string str)
+size_t	DynamicMath::oversize0Number() const
 {
-	parse(str, comma, negative, decimal);
-	std::cout << str << std::endl;
-	std::cout << comma << std::endl;
-	std::cout << decimal << std::endl;
-	size_t len = str.size();
+	for (size_t i = 0; i < size; i++)
+	{
+		if (data[i] == 0)
+			continue;
+		for (short j = 7; j >=0; j--)
+		{
+			if ((data[i] >> j) % 2)
+				return i*8 + 7-j;
+		}
+	}
+	return size;
+}
+
+void	DynamicMath::resetValues()
+{
+	negative = false;
+	decimal = false;
+	size = 0;
+	comma = 0;
+	if (data)
+		free(data);
+	data = NULL;
+}
+
+void	DynamicMath::parseString(const std::string str)
+{
+	std::string newstr = str;
+	resetValues();
+	parse(newstr, comma, negative, decimal);
+	size_t len = newstr.size();
 	size = roundUp(floor(len / LOG10OF2) + 1, 8) / 8; //log10(number) / log10(2) = number of bits to allocate
 
-	allocBuffer(data, size);
+	allocData(data, size);
 
 	uint64_t extrabits = size * 8;
-	for (;str.size(); extrabits--)
-		charToBinary(str, data, size);
+	for (;newstr.size(); extrabits--)
+		charToBinary(newstr, data, size);
 
 	for (;extrabits > 0; extrabits--)
 		memshift(data, size);
+}
 
+
+void	DynamicMath::printData()
+{
+	std::cout << "size: " << size << std::endl;
+	std::cout << "comma: " << comma << std::endl;
+	std::cout << "decimal: " << decimal << std::endl;
+	std::cout << "negative: " << negative << std::endl;
 	printBinary(data, size);
+	std::cout << std::endl;
 }
 
-DynamicMath::DynamicMath(char *str)
+DynamicMath &DynamicMath::operator=(const DynamicMath &cp)
 {
-	parseString(str);
+	resetValues();
+	negative = cp.negative;
+	decimal = cp.decimal;
+	size = cp.size;
+	comma = cp.comma;
+	allocData(data, size);
+	memcpy(data, cp.data, size);
+	return *this;
 }
 
-DynamicMath::DynamicMath(std::string str)
+std::ostream& operator<<(std::ostream& os, const DynamicMath& obj)
 {
-	parseString(str);
+	(void)obj;
+	return os;
+}
+
+DynamicMath::DynamicMath()
+{
+	parseString("0");
+}
+
+DynamicMath::DynamicMath(const DynamicMath &cp)
+{
+	*this = cp;
 }
 
 DynamicMath::~DynamicMath()
