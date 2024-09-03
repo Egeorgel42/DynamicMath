@@ -10,7 +10,7 @@ static char	binaryAddition(unsigned char &dest, unsigned char &op, char buff)
 			nextBuff = 1;
 		else if (((dest >> i) % 2 || (op >> i) % 2) && buff)
 			nextBuff = 1;
-		char add = ((dest >> i) % 2 != (op >> i) % 2) + buff;
+		char add = ((dest >> i) % 2 != (op >> i) % 2) != buff;
 		if ((dest >> i) % 2)
 			dest -= 1 << i;
 		if (add)
@@ -50,6 +50,8 @@ void	DynamicMath::add(const DynamicMath &main, const DynamicMath &add, size_t ov
 {
 	uint64_t delta_comma = main.comma > add.comma ? main.comma - add.comma : add.comma - main.comma; //abs of main - op.coma
 	unsigned char *buff = NULL;
+	unsigned char *buff_add = NULL;
+	size_t buff_size;
 	size_t newsize = size;
 
 	comma = add.comma;
@@ -59,16 +61,22 @@ void	DynamicMath::add(const DynamicMath &main, const DynamicMath &add, size_t ov
 		if (added_size > oversize)
 			newsize += roundUp(added_size - oversize, 8) / 8;
 	}
+	buff_size = newsize;
 	allocData(buff, newsize);
+	allocData(buff_add, buff_size);
 	memcpy(buff + newsize - main.size, main.data, main.size);
-	if (delta_comma)
+	for (; delta_comma > 0; delta_comma--)
 	{
-		memshiftL(buff, newsize, 2 * delta_comma);
-		addToBuffer(buff, newsize, main.data, main.size);
-		memshiftL(buff, newsize, 1 * delta_comma);
+		if (buff_size != newsize)
+			reallocData(buff_add, buff_size, newsize);
+		memcpy(buff_add, buff, buff_size);
+		memshiftL(buff, newsize, 3);
+		memshiftL(buff_add, newsize, 1);
+		addToBuffer(buff, newsize, buff_add, newsize);
 	}
 	addToBuffer(buff, newsize, add.data, add.size);
 	size = newsize;
+	free(buff_add);
 	free(data);
 	data = buff;
 }

@@ -18,7 +18,7 @@ void allocData(unsigned char *&data, size_t size)
 
 void	reallocData(unsigned char *&data, size_t &size, size_t newsize)
 {
-	if (size <= newsize)
+	if (newsize <= size)
 		return;
 	unsigned char *newdata = (unsigned char *)malloc(newsize);
 	if (!newdata)
@@ -48,8 +48,8 @@ void	memshiftL(unsigned char *data, size_t size, size_t shiftSize)
 {
 	if (!shiftSize)
 		return;
-	bool mem[shiftSize];
-	bool next_mem[shiftSize];
+	bool *mem = new bool[shiftSize];
+	bool *next_mem = new bool[shiftSize];
 	memset(mem, (int)false, shiftSize);
 	memset(next_mem, (int)false, shiftSize);
 	size--;
@@ -62,10 +62,12 @@ void	memshiftL(unsigned char *data, size_t size, size_t shiftSize)
 			if (data[size] / 128)
 				next_mem[j] = true;
 			data[size] <<= 1;
-			if (mem[shiftSize - 1 - j])
+			if (mem[j])
 				data[size] += 1;
 		}
 	}
+	delete[] mem;
+	delete[] next_mem;
 }
 
 void charToBinary(std::string &str, unsigned char *data, uint64_t size)

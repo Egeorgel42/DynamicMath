@@ -22,8 +22,7 @@ int main(int argc, char **argv)
 		printTest(argv[1]);
 	printTest(-1);
 	DynamicMath test1 = 1;
-	DynamicMath test2 = 2;
-	DynamicMath test3 = "0.1";
-	printTest(test1 + test2);
-	printTest(test1 + test3);
+	DynamicMath test2 = "60.4";
+	DynamicMath test3 = "0.6";
+	printTest(test2 + test3);
 }
