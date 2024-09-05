@@ -12,7 +12,10 @@
 
 # define UTILS \
 void	resetValues(); \
-void	add(const DynamicMath &main, const DynamicMath &add, size_t oversize);
+void	resizeBeforeOperation(const DynamicMath &main, const DynamicMath &add); \
+void	additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
+void	add(const DynamicMath &op); \
+void	multiply(const DynamicMath &main, const DynamicMath &add, size_t oversize); \
 
 # define CONSTRUCTORS \
 DynamicMath(); \
@@ -60,7 +63,6 @@ class DynamicMath
 		template<typename T>
 		void	parseIntegral(const T &t);
 		void	parseString(const std::string str);
-		size_t	oversize0Number() const;
 	public:
 		CONSTRUCTORS
 		ASSIGN_OPERATOR

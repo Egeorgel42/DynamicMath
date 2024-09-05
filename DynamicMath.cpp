@@ -45,21 +45,6 @@ static void	parse(std::string &str, uint64_t &comma, bool &negative, bool &decim
 	}
 }
 
-size_t	DynamicMath::oversize0Number() const
-{
-	for (size_t i = 0; i < size; i++)
-	{
-		if (data[i] == 0)
-			continue;
-		for (short j = 7; j >=0; j--)
-		{
-			if ((data[i] >> j) % 2)
-				return i*8 + 7-j;
-		}
-	}
-	return size;
-}
-
 void	DynamicMath::resetValues()
 {
 	negative = false;
