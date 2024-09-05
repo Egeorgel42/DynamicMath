@@ -1,10 +1,38 @@
 #include "DynamicMath.hpp"
 
-void	revmemcpy(void *dest, const void *src, const size_t size)
+char	binaryAddition(unsigned char &dest, unsigned char &op, char buff)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		char nextBuff = 0;
+		if ((dest >> i) % 2 && (op >> i) % 2)
+			nextBuff = 1;
+		else if (((dest >> i) % 2 || (op >> i) % 2) && buff)
+			nextBuff = 1;
+		char add = ((dest >> i) % 2 != (op >> i) % 2) != buff;
+		if ((dest >> i) % 2)
+			dest -= 1 << i;
+		if (add)
+			dest += add << i;
+		buff = nextBuff;
+	}
+	return buff;
+}
+
+/// @brief a memcpy that reverses all 0 and 1s, this function is made to enable substractions for more details, lookup addtion/substraction using 1's complement
+void	complement_memcpy(void *dest, const void *src, const size_t size)
 {
 	for (size_t i = 0; i < size; i++)
-		((char *) dest)[i] = ((char *)src)[size - i - 1];
+		((unsigned char *)dest)[i] = ~((unsigned char *)src)[i];
 }
+
+/// @brief reverses all 0 and 1s, this function is made to enable substractions for more details, lookup addtion/substraction using 1's complement
+void	complement(void *dest, const size_t size)
+{
+	for (size_t i = 0; i < size; i++)
+		((unsigned char *)dest)[i] = ~((unsigned char *)dest)[i];
+}
+
 
 void allocData(unsigned char *&data, size_t size)
 {
@@ -28,6 +56,31 @@ void	reallocData(unsigned char *&data, size_t &size, size_t newsize)
 	free(data);
 	data = newdata;
 	size = newsize;
+}
+/// @brief Will return true if the result of the operation resulted in a "carry over" when has_negative = true, reverse the numbers when only one of the numbers was negative and the return was negative or when both of the numbers are negative (should always return true, if not something is wrong)
+bool	addToBuffer(unsigned char *data, size_t &size, unsigned char *add, size_t add_size, bool has_negative)
+{
+	unsigned char buff = 0;
+	unsigned char null = 0;
+	if (add_size > size)
+		reallocData(data, size, add_size);
+	size_t i = size - 1;
+	size_t j = add_size - 1;
+	for (; i != SIZE_MAX && j != SIZE_MAX; i--, j--)
+		buff = binaryAddition(data[i], add[j], buff);
+	for (; i != SIZE_MAX && buff; i--)
+		buff = binaryAddition(data[i], null, buff);
+	if (i == SIZE_MAX && buff && has_negative)
+	{
+		addToBuffer(data, size, &buff, 1, false);
+		return true;
+	}
+	if (i == SIZE_MAX && buff)
+	{
+		reallocData(data, size, size + 1);
+		data[0] += 1;
+	}
+	return false;
 }
 
 void	memshift(unsigned char *buf, size_t len)
