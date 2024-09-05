@@ -1,6 +1,6 @@
 CC = c++
 SRC = DynamicMath.cpp \
-DynamicOperations.cpp \
+addition.cpp \
 DynamicUtils.cpp \
 testing.cpp
 OBJ = ${SRC:.cpp=.o}
