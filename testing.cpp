@@ -20,9 +20,7 @@ int main(int argc, char **argv)
 {
 	if (argc == 2)
 		printTest(argv[1]);
-	printTest(-1);
-	DynamicMath test1 = -1;
-	DynamicMath test2 = "60.4";
-	DynamicMath test3 = -2;
-	printTest(test3 + test1);
+	DynamicMath test1 = "-9.000000000000000001";
+	DynamicMath test3 = -9000000000000000000;
+	printTest(test3 + test1 + test1 + test1);
 }

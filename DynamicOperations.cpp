@@ -29,11 +29,21 @@ void	DynamicMath::add(const DynamicMath &main, const DynamicMath &add, size_t ov
 		memshiftL(buff_add, newsize, 1);
 		addToBuffer(buff, newsize, buff_add, newsize, negative);
 	}
+	if (buff_size != newsize)
+		reallocData(buff_add, buff_size, newsize);
+	if (main.negative && add.negative && (main.oversize0Number() == 0 || add.oversize0Number() == 0))
+	{
+		reallocData(buff, newsize, newsize + 1);
+		reallocData(buff_add, buff_size, newsize);
+	}
 	if (main.negative)
 		complement(buff, newsize);
+	bzero(buff_add, buff_size);
 	memcpy(buff_add + buff_size - add.size, add.data, add.size);
 	if (add.negative)
 		complement(buff_add, buff_size);
+	printBinary(buff_add, buff_size);
+	printBinary(buff, newsize);
 	bool res = addToBuffer(buff, newsize, buff_add, buff_size, main.negative || add.negative);
 	if ((!res && main.negative != add.negative) || (res && main.negative && add.negative))
 	{
