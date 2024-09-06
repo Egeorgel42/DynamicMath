@@ -1,7 +1,7 @@
 #include "DynamicMath.hpp"
 #include "DynamicUtils.hpp"
 
-void	DynamicMath::additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size)
+bool	DynamicMath::additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size)
 {
 	if (op.size > size)
 		reallocData(data, size, op.size);
@@ -10,29 +10,35 @@ void	DynamicMath::additionBuffer(const DynamicMath &op, unsigned char *&buff, si
 		allocData(buff, size);
 		memcpy(buff, data, size);
 		current_size = size;
-		return;
+		return true;
 	}
 	uint64_t delta_comma = comma > op.comma ? comma - op.comma : op.comma - comma; //abs of main - op.coma
 	unsigned char *buff_add = NULL;
 	current_size = size;
 	size_t buff_size = current_size;
 	size_t oversize = oversize0Number(data, size);
+	bool ret = true;
 
 	if (size == op.size)
 		oversize = oversize < oversize0Number(op.data, op.size) ? oversize : oversize0Number(op.data, op.size);
-	else if (op.size > size)
-		oversize = oversize0Number(op.data, op.size);
 
 	size_t added_size = floor(delta_comma / LOG10OF2) + 1;
 	if (added_size > oversize)
-		current_size += roundUp(added_size - oversize, 8) / 8;
+	{
+		added_size = roundUp(added_size - oversize, 8) / 8 + current_size;
+		if (added_size < current_size)
+			throw std::overflow_error("attained maximum computable size");
+	}
 
-	allocData(buff, current_size);
+	reallocData(buff, current_size, added_size);
 	allocData(buff_add, buff_size);
-	if (comma > op.comma)
+	if (comma < op.comma)
 		memcpy(buff + current_size - size, data, size);
 	else
+	{
+		ret = false;
 		memcpy(buff + current_size - op.size, op.data, op.size);
+	}
 	for (; delta_comma > 0; delta_comma--)
 	{
 		if (buff_size != current_size)
@@ -44,6 +50,16 @@ void	DynamicMath::additionBuffer(const DynamicMath &op, unsigned char *&buff, si
 	}
 	comma = comma > op.comma ? comma : op.comma;
 	free(buff_add);
+	return ret;
+}
+
+static void	alloc_buff_add(bool negative, unsigned char *&data, unsigned char *cp, size_t size, size_t &add_size)
+{
+	add_size = size;
+	if (negative && oversize0Number(cp, size) == 0)
+		add_size++;
+	allocData(data, size);
+	memcpy(data, cp, size);
 }
 
 void	DynamicMath::add(const DynamicMath &op)
@@ -51,20 +67,24 @@ void	DynamicMath::add(const DynamicMath &op)
 	unsigned char *buff = NULL;
 	unsigned char *buff_add = NULL;
 	size_t buff_size;
-	size_t add_size = op.size;
+	size_t add_size;
+	bool fill_1 = false;
 
-	additionBuffer(op, buff, buff_size);
+	bool isself = additionBuffer(op, buff, buff_size);
 	if (negative && op.negative && oversize0Number(buff, buff_size) == 0)
 		reallocData(buff, buff_size, buff_size + 1);
-	if (negative && op.negative && oversize0Number(op.data, op.size) == 0)
-		add_size++;
-	if (negative)
+	if ((isself && negative) || (!isself && op.negative))
 		complement(buff, buff_size);
-	allocData(buff_add, add_size);
-	memcpy(buff_add + add_size - op.size, op.data, op.size);
-	if (op.negative)
+	if (isself)
+		alloc_buff_add(negative && op.negative, buff_add, op.data, op.size, add_size);
+	else
+		alloc_buff_add(negative && op.negative, buff_add, data, size, add_size);
+	if ((!isself && negative) || (isself && op.negative))
+	{
 		complement(buff_add, add_size);
-	bool res = addToBuffer(buff, buff_size, buff_add, add_size, negative || op.negative, op.negative);
+		fill_1 = true;
+	}
+	bool res = addToBuffer(buff, buff_size, buff_add, add_size, negative || op.negative, fill_1);
 	if ((!res && negative != op.negative) || (res && negative && op.negative))
 	{
 		complement(buff, buff_size);

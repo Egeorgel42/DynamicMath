@@ -22,5 +22,5 @@ int main(int argc, char **argv)
 		printTest(argv[1]);
 	DynamicMath test1 = "-9.000000000000000001";
 	DynamicMath test3 = -9000000000000000000;
-	printTest(test3 + test1 + test1 + test1);
+	printTest(test1 + test3);
 }

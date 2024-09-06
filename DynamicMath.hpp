@@ -12,10 +12,11 @@
 
 # define UTILS \
 void	resetValues(); \
-void	resizeBeforeOperation(const DynamicMath &main, const DynamicMath &add); \
-void	additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
+bool	additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
+void	mutiplicationBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
 void	add(const DynamicMath &op); \
-void	multiply(const DynamicMath &main, const DynamicMath &add, size_t oversize); \
+void	multiply(const DynamicMath &op); \
+size_t	mutiplicationSize(const DynamicMath &op);
 
 # define CONSTRUCTORS \
 DynamicMath(); \

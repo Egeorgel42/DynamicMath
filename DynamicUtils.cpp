@@ -67,13 +67,16 @@ void	reallocData(unsigned char *&data, size_t &size, size_t newsize)
 	if (!newdata)
 		throw std::bad_alloc();
 	bzero(newdata, newsize);
-	memcpy(newdata + newsize - size, data, size);
-	free(data);
+	if (data)
+	{
+		memcpy(newdata + newsize - size, data, size);
+		free(data);
+	}
 	data = newdata;
 	size = newsize;
 }
 /// @brief Will return true if the result of the operation resulted in a "carry over" when has_negative = true, reverse the numbers when only one of the numbers was negative and the return was negative or when both of the numbers are negative (should always return true, if not something is wrong)
-bool	addToBuffer(unsigned char *data, size_t &size, unsigned char *add, size_t add_size, bool has_negative, bool fill_with_1)
+bool	addToBuffer(unsigned char *&data, size_t &size, unsigned char *add, size_t add_size, bool has_negative, bool fill_with_1)
 {
 	unsigned char buff = 0;
 	unsigned char null = 0;
