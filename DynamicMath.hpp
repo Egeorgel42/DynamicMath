@@ -13,10 +13,9 @@
 # define UTILS \
 void	resetValues(); \
 bool	additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
-void	mutiplicationBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
+void	mutiplicationBuffer(const DynamicMath &op); \
 void	add(const DynamicMath &op); \
 void	multiply(const DynamicMath &op); \
-size_t	mutiplicationSize(const DynamicMath &op);
 
 # define CONSTRUCTORS \
 DynamicMath(); \
@@ -49,8 +48,10 @@ DynamicMath &operator=(const DynamicMath &cp);
 # define OPERATIONS \
 DynamicMath &operator+=(const DynamicMath &op); \
 DynamicMath &operator-=(const DynamicMath &op); \
+DynamicMath &operator*=(const DynamicMath &op); \
 friend DynamicMath operator+(DynamicMath tmp, const DynamicMath &op); \
-friend DynamicMath operator-(DynamicMath tmp, const DynamicMath &op);
+friend DynamicMath operator-(DynamicMath tmp, const DynamicMath &op); \
+friend DynamicMath operator*(DynamicMath tmp, const DynamicMath &op); \
 
 class DynamicMath
 {

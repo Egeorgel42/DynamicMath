@@ -1,61 +1,48 @@
 #include "DynamicMath.hpp"
 #include "DynamicUtils.hpp"
 
-size_t	DynamicMath::mutiplicationSize(const DynamicMath &op)
+void	DynamicMath::mutiplicationBuffer(const DynamicMath &op)
 {
 	size_t i = roundUp(size * 8 - oversize0Number(data, size), 8) / 8 + roundUp(op.size * 8 - oversize0Number(op.data, op.size), 8) / 8;
-	if (i < size || i < op.size)
+	if (i < roundUp(size * 8 - oversize0Number(data, size), 8) / 8 || i < roundUp(op.size * 8 - oversize0Number(op.data, op.size), 8) / 8)
 		throw std::overflow_error("attained maximum computable size");
-	return i;
-}
-
-void	DynamicMath::mutiplicationBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size)
-{
-	current_size = mutiplicationSize(op);
-	reallocData(data, size, current_size);
-	if (comma == op.comma)
-	{
-		allocData(buff, size);
-		memcpy(buff, data, size);
-		current_size = size;
-		return;
-	}
-	uint64_t delta_comma = comma > op.comma ? comma - op.comma : op.comma - comma; //abs of main - op.coma
-	unsigned char *buff_add = NULL;
-	size_t buff_size = current_size;
-	size_t oversize = oversize0Number(data, size);
-
-	if (size == op.size)
-		oversize = oversize < oversize0Number(op.data, op.size) ? oversize : oversize0Number(op.data, op.size);
-
-	size_t added_size = floor(delta_comma / LOG10OF2) + 1;
-	if (added_size > oversize)
-	{
-		current_size += roundUp(added_size - oversize, 8) / 8;
-		if (current_size < added_size)
-			throw std::overflow_error("attained maximum computable size");
-	}
-
-	allocData(buff, current_size);
-	allocData(buff_add, buff_size);
-	if (comma > op.comma)
-		memcpy(buff + current_size - size, data, size);
-	else
-		memcpy(buff + current_size - op.size, op.data, op.size);
-	for (; delta_comma > 0; delta_comma--)
-	{
-		if (buff_size != current_size)
-			reallocData(buff_add, buff_size, current_size);
-		memcpy(buff_add, buff, buff_size);
-		memshiftL(buff, current_size, 3);
-		memshiftL(buff_add, current_size, 1);
-		addToBuffer(buff, current_size, buff_add, buff_size, false, false);
-	}
-	comma = comma > op.comma ? comma : op.comma;
-	free(buff_add);
+	reallocData(data, size, i);
 }
 
 void	DynamicMath::multiply(const DynamicMath &op)
 {
+	mutiplicationBuffer(op);
+	unsigned char *add_buff = NULL;;
+	allocData(add_buff, size);
+	memcpy(add_buff, data, size);
+	bzero(data, size);
+	for(size_t i = op.size - 1; i != SIZE_MAX; i--)
+	{
+		for (size_t j = 0; j < 8; j++)
+		{
+			if ((op.data[i] >> j) % 2)
+			{
+				addToBuffer(data, size, add_buff, size, false, false);
+				memshiftL(add_buff, size, 1);
+			}
+			else
+				memshiftL(add_buff, size, 1);
+		}
+	}
+}
 
+DynamicMath &DynamicMath::operator*=(const DynamicMath &op)
+{
+	decimal = decimal || op.decimal;
+	negative = negative != op.negative;
+	comma = comma + op.comma;
+	multiply(op);
+	return *this;
+}
+
+
+DynamicMath operator*(DynamicMath tmp, const DynamicMath &op)
+{
+	tmp *= op;
+	return tmp;
 }
