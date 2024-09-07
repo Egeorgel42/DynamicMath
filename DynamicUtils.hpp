@@ -2,11 +2,13 @@
 # define DYNAMICUTILS_HPP
 # include <string>
 
+void	resizeToComma(unsigned char *&data, size_t &size, size_t delta_comma, size_t oversize);
 size_t	oversize0Number(unsigned char *data, size_t size);
 void	complement_memcpy(void *dest, const void *src, const size_t size);
 void	complement(void *dest, const size_t size);
 void	allocData(unsigned char *&data, size_t size); 
-void	reallocData(unsigned char *&data, size_t &size, size_t newsize); 
+void	reallocData(unsigned char *&data, size_t &size, size_t newsize);
+void	reallocDataC(unsigned char *&data, size_t &size, size_t newsize, unsigned char c);
 void	memshift(unsigned char *buf, size_t len); 
 void	printBinary(unsigned char *data, size_t len); 
 size_t	floor(long double nbr); 

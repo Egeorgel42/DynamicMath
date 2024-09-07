@@ -12,7 +12,6 @@
 
 # define UTILS \
 void	resetValues(); \
-bool	additionBuffer(const DynamicMath &op, unsigned char *&buff, size_t &current_size); \
 void	mutiplicationBuffer(const DynamicMath &op); \
 void	add(const DynamicMath &op); \
 void	multiply(const DynamicMath &op); \

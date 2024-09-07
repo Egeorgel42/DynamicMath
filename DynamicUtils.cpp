@@ -66,7 +66,7 @@ void	reallocData(unsigned char *&data, size_t &size, size_t newsize)
 	unsigned char *newdata = (unsigned char *)malloc(newsize);
 	if (!newdata)
 		throw std::bad_alloc();
-	bzero(newdata, newsize);
+	bzero(newdata, newsize - size);
 	if (data)
 	{
 		memcpy(newdata + newsize - size, data, size);
@@ -75,6 +75,24 @@ void	reallocData(unsigned char *&data, size_t &size, size_t newsize)
 	data = newdata;
 	size = newsize;
 }
+
+void	reallocDataC(unsigned char *&data, size_t &size, size_t newsize, unsigned char c)
+{
+	if (newsize <= size)
+		return;
+	unsigned char *newdata = (unsigned char *)malloc(newsize);
+	if (!newdata)
+		throw std::bad_alloc();
+	memset(newdata, c, newsize - size);
+	if (data)
+	{
+		memcpy(newdata + newsize - size, data, size);
+		free(data);
+	}
+	data = newdata;
+	size = newsize;
+}
+
 /// @brief Will return true if the result of the operation resulted in a "carry over" when has_negative = true, reverse the numbers when only one of the numbers was negative and the return was negative or when both of the numbers are negative (should always return true, if not something is wrong)
 bool	addToBuffer(unsigned char *&data, size_t &size, unsigned char *add, size_t add_size, bool has_negative, bool fill_with_1)
 {
@@ -83,7 +101,7 @@ bool	addToBuffer(unsigned char *&data, size_t &size, unsigned char *add, size_t 
 	if (fill_with_1 && has_negative)
 		null = 255;
 	if (add_size > size)
-		reallocData(data, size, add_size);
+		reallocDataC(data, size, add_size, null);
 	size_t i = size - 1;
 	size_t j = add_size - 1;
 	for (; i != SIZE_MAX && j != SIZE_MAX; i--, j--)
@@ -191,4 +209,34 @@ size_t roundUp(size_t numToRound, size_t multiple)
         return numToRound;
 
     return numToRound + multiple - remainder;
+}
+
+
+void	resizeToComma(unsigned char *&data, size_t &size, size_t delta_comma, size_t oversize)
+{
+	unsigned char *buff = NULL;
+	if (!delta_comma)
+		return;
+
+	size_t added_size = floor(delta_comma / LOG10OF2) + 1;
+	if (added_size > oversize)
+	{
+		added_size = roundUp(added_size - oversize, 8) / 8;
+		if (added_size + size < size)
+			throw std::overflow_error("attained maximum computable size");
+	}
+
+	reallocData(data, size, added_size + size);
+	allocData(buff, size);
+	size_t buff_size = size;
+	for (; delta_comma > 0; delta_comma--)
+	{
+		if (buff_size != size)
+			reallocData(buff, buff_size, size);
+		memcpy(buff, data, size);
+		memshiftL(data, size, 3);
+		memshiftL(buff, size, 1);
+		addToBuffer(data, size, buff, size, false, false);
+	}
+	free(buff);
 }
