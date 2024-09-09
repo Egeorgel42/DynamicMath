@@ -15,6 +15,8 @@ void	resetValues(); \
 void	mutiplicationBuffer(const DynamicMath &op); \
 void	add(const DynamicMath &op); \
 void	multiply(const DynamicMath &op); \
+void	division(const DynamicMath &op); \
+void	modulo(const DynamicMath &op);
 
 # define CONSTRUCTORS \
 DynamicMath(); \
@@ -48,9 +50,15 @@ DynamicMath &operator=(const DynamicMath &cp);
 DynamicMath &operator+=(const DynamicMath &op); \
 DynamicMath &operator-=(const DynamicMath &op); \
 DynamicMath &operator*=(const DynamicMath &op); \
+DynamicMath &operator%=(const DynamicMath &op); \
 friend DynamicMath operator+(DynamicMath tmp, const DynamicMath &op); \
 friend DynamicMath operator-(DynamicMath tmp, const DynamicMath &op); \
 friend DynamicMath operator*(DynamicMath tmp, const DynamicMath &op); \
+friend DynamicMath operator%(DynamicMath tmp, const DynamicMath &op); \
+friend bool operator< (const DynamicMath& lhs, const DynamicMath& rhs); \
+friend bool operator> (const DynamicMath& lhs, const DynamicMath& rhs); \
+friend bool operator<= (const DynamicMath& lhs, const DynamicMath& rhs); \
+friend bool operator>= (const DynamicMath& lhs, const DynamicMath& rhs); 
 
 class DynamicMath
 {

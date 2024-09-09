@@ -105,7 +105,7 @@ std::ostream& operator<<(std::ostream& os, const DynamicMath& obj)
 
 DynamicMath::DynamicMath()
 {
-	parseString("0");
+	parseIntegral(0);
 }
 
 DynamicMath::DynamicMath(const DynamicMath &cp)

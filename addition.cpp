@@ -5,44 +5,35 @@ void	DynamicMath::add(const DynamicMath &op)
 {
 	uint64_t delta_comma = comma > op.comma ? comma - op.comma : op.comma - comma; //abs of main - op.coma
 	unsigned char *buff = NULL;
-	size_t buff_size;
-	size_t oversize = oversize0Number(data, size);
+	size_t buff_size = op.size;
 
-	if (size < op.size)
-		reallocData(data, size, op.size);
-	if (size > op.size)
-		oversize = oversize0Number(data, size);
-	if (size == op.size)
-		oversize = oversize < oversize0Number(op.data, op.size) ? oversize : oversize0Number(op.data, op.size);
 	if (comma > op.comma || op.negative)
 	{
-		buff_size = op.size;
 		if (negative && op.negative && oversize0Number(op.data, op.size) == 0)
 			buff_size++;
 		allocData(buff, buff_size);
 		memcpy(buff + buff_size - op.size, op.data, op.size);
 		if (comma > op.comma)
-			resizeToComma(buff, buff_size, delta_comma, oversize);
+			resizeToComma(buff, buff_size, delta_comma, oversize0Number(buff, buff_size));
 		if (op.negative)
 			complement(buff, buff_size);
 	}
 	else
-	{
 		buff = op.data;
-		buff_size = op.size;
-	}
 	if (comma < op.comma || negative)
 	{
 		if (negative && op.negative && oversize0Number(data, size) == 0)
 			reallocData(data, size, size + 1);
 		if (comma < op.comma)
 		{
-			resizeToComma(data, size, delta_comma, oversize);
+			resizeToComma(data, size, delta_comma, oversize0Number(data, size));
 			comma = op.comma;
 		}
 		if (negative)
 			complement(data, size);
 	}
+	if (size < buff_size)
+		reallocData(data, size, buff_size);
 	bool res = addToBuffer(data, size, buff, buff_size, negative || op.negative, op.negative);
 	if ((!res && negative != op.negative) || (res && negative && op.negative))
 	{

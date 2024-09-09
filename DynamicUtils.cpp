@@ -1,5 +1,45 @@
 #include "DynamicMath.hpp"
 
+/// @brief returns 1 if left is smaller, 0 if they are equal, -1 if right is smaller
+int	diff(const unsigned char *left, size_t l_size, const unsigned char *right, size_t r_size)
+{
+	const unsigned char *buff = NULL;
+	size_t l_count = 0;
+	size_t r_count = 0;
+	size_t delta_size = 0;
+	if (l_size > r_size)
+	{
+		delta_size = l_size - r_size;
+		l_count = delta_size;
+		buff = left;
+	}
+	else if (l_size < r_size)
+	{
+		delta_size = r_size - l_size;
+		r_count = delta_size;
+		buff = right;
+	}
+	for (size_t i = 0; i < delta_size; i++)
+	{
+		if (buff[i] != 0)
+		{
+			if (l_count > r_count)
+				return -1;
+			return 1;
+		}
+	}
+	for (;l_count < l_size && r_count < r_size; l_count++, r_count++)
+	{
+		if (left[l_count] == right[r_count])
+			continue;
+		else if (left[l_count] > right[r_count])
+			return -1;
+		else
+			return 1;
+	}
+	return 0;
+}
+
 size_t	oversize0Number(unsigned char *data, size_t size)
 {
 	for (size_t i = 0; i < size; i++)
@@ -12,7 +52,7 @@ size_t	oversize0Number(unsigned char *data, size_t size)
 				return i*8 + 7-j;
 		}
 	}
-	return size;
+	return size * 8;
 }
 
 char	binaryAddition(unsigned char &dest, unsigned char &op, char buff)
@@ -121,6 +161,41 @@ bool	addToBuffer(unsigned char *&data, size_t &size, unsigned char *add, size_t 
 	return false;
 }
 
+void	memshiftR(unsigned char *data, size_t size, size_t shiftSize)
+{
+	if (!shiftSize)
+		return;
+	if (shiftSize >= 8)
+	{
+		size_t shiftbuff = shiftSize / 8;
+		for (size_t i = shiftbuff; i < size; i++)
+			data[i] = data[i - shiftbuff];
+		for (size_t i = 0; i < shiftbuff; i++)
+			data[i] = 0;
+		shiftSize = shiftSize % 8;
+	}
+	bool *mem = new bool[shiftSize];
+	bool *next_mem = new bool[shiftSize];
+	memset(mem, (int)false, shiftSize);
+	memset(next_mem, (int)false, shiftSize);
+	size--;
+	for (; size != SIZE_MAX; size--)
+	{
+		memcpy(mem, next_mem, shiftSize);
+		memset(next_mem, (int)false, shiftSize);
+		for (size_t i = 0; i < shiftSize; i++)
+		{
+			if (data[size] % 2)
+				next_mem[i] = true;
+			data[size] >>= 1;
+			if (mem[i])
+				data[size] += 128;
+		}
+	}
+	delete[] mem;
+	delete[] next_mem;
+}
+
 void	memshift(unsigned char *buf, size_t len)
 {
 	bool mem = false;
@@ -139,6 +214,16 @@ void	memshiftL(unsigned char *data, size_t size, size_t shiftSize)
 {
 	if (!shiftSize)
 		return;
+	if (shiftSize >= 8)
+	{
+		size_t shiftbuff = shiftSize / 8;
+		size_t i = shiftbuff;
+		for (; i < size; i++)
+			data[i - shiftbuff] = data[i];
+		for (; i - shiftbuff < size; i++)
+			data[i - shiftbuff] = 0;
+		shiftSize = shiftSize % 8;
+	}
 	bool *mem = new bool[shiftSize];
 	bool *next_mem = new bool[shiftSize];
 	memset(mem, (int)false, shiftSize);

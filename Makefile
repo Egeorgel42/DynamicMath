@@ -3,7 +3,10 @@ SRC = DynamicMath.cpp \
 addition.cpp \
 DynamicUtils.cpp \
 testing.cpp \
-multiplication.cpp
+multiplication.cpp \
+division.cpp \
+comparaison.cpp
+
 OBJ = ${SRC:.cpp=.o}
 CFLAGS = -Wall -Werror -Wextra -std=c++17 -g #-fsanitize=address
 NAME = DynamicTesting
