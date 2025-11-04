@@ -14,7 +14,7 @@ NAME = DynamicTesting
 all: $(NAME)
 
 $(NAME): $(OBJ) Makefile
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
+	$(CC) $(CFLAGS) -no-pie -o $(NAME) $(OBJ)
 
 clean:
 	rm -f $(OBJ)

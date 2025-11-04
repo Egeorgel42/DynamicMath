@@ -7,6 +7,7 @@
 # include <bitset>
 # include <regex>
 # include <type_traits>
+# include <cstdint>
 
 # define LOG10OF2 0.30102999566398114
 
@@ -70,8 +71,8 @@ class DynamicMath
 		unsigned char	*data = NULL;
 		UTILS
 		template<typename T>
-		void	parseIntegral(const T &t);
-		void	parseString(const std::string str);
+		void		parseIntegral(const T &t);
+		void		parseString(const std::string str);
 	public:
 		CONSTRUCTORS
 		ASSIGN_OPERATOR

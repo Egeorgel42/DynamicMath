@@ -16,11 +16,43 @@ void 	printTest(T var)
 	test.printData();
 }
 
+void testOperation(DynamicMath &nbr1, std::string operation, std::regex_token_iterator<std::string::iterator> &it)
+{
+	std::regex_token_iterator<std::string::iterator> end;
+	it++;
+	if (it == end)
+		throw;
+	DynamicMath nbr2(*it);
+	if (operation == "+")
+		nbr1 += nbr2;
+	else if (operation == "-")
+		nbr1 -= nbr2;
+	else if (operation == "*")
+		nbr1 *= nbr2;
+	else if (operation == "%")
+		nbr1 %= nbr2;
+	else
+		throw;
+}
+
+void 	printTestChar(std::string str)
+{
+	std::regex split = std::regex(R"([^\s]+)");
+	std::regex_token_iterator<std::string::iterator> it(str.begin(), str.end(), split);
+	std::regex_token_iterator<std::string::iterator> end;
+	if (it == end)
+		throw;
+	DynamicMath nbr1(*it);
+	it++;
+	for (; it != end; it++)
+	{
+		testOperation(nbr1, *it, it);
+		nbr1.printData();
+	}
+}
+
 int main(int argc, char **argv)
 {
 	if (argc == 2)
-		printTest(argv[1]);
-	DynamicMath test1 = -20;
-	DynamicMath test3 = "-1.5";
-	printTest(test1 % test3);
+		printTestChar(argv[1]);
 }
