@@ -52,14 +52,22 @@ DynamicMath &operator+=(const DynamicMath &op); \
 DynamicMath &operator-=(const DynamicMath &op); \
 DynamicMath &operator*=(const DynamicMath &op); \
 DynamicMath &operator%=(const DynamicMath &op); \
+DynamicMath &operator/=(const DynamicMath &op); \
+DynamicMath operator--(int null); \
+DynamicMath operator++(int null); \
+DynamicMath &operator--(); \
+DynamicMath &operator++(); \
 friend DynamicMath operator+(DynamicMath tmp, const DynamicMath &op); \
 friend DynamicMath operator-(DynamicMath tmp, const DynamicMath &op); \
 friend DynamicMath operator*(DynamicMath tmp, const DynamicMath &op); \
+friend DynamicMath operator^(DynamicMath tmp, const DynamicMath &op); \
 friend DynamicMath operator%(DynamicMath tmp, const DynamicMath &op); \
+friend DynamicMath operator/(DynamicMath tmp, const DynamicMath &op); \
 friend bool operator< (const DynamicMath& lhs, const DynamicMath& rhs); \
 friend bool operator> (const DynamicMath& lhs, const DynamicMath& rhs); \
 friend bool operator<= (const DynamicMath& lhs, const DynamicMath& rhs); \
-friend bool operator>= (const DynamicMath& lhs, const DynamicMath& rhs); 
+friend bool operator>= (const DynamicMath& lhs, const DynamicMath& rhs); \
+friend std::ostream& operator<<(std::ostream& os, const DynamicMath& obj);
 
 class DynamicMath
 {
@@ -71,16 +79,18 @@ class DynamicMath
 		unsigned char	*data = NULL;
 		UTILS
 		template<typename T>
-		void		parseIntegral(const T &t);
-		void		parseString(const std::string str);
+		void			parseIntegral(const T &t);
+		void			parseString(const std::string str);
+		DynamicMath		precision();
+		DynamicMath		divNoRem(DynamicMath div);
 	public:
 		CONSTRUCTORS
 		ASSIGN_OPERATOR
 		OPERATIONS
-		void	printData();
+		DynamicMath	ceil();
+		std::string	returnData();
+		std::string	toString() const;
 };
-
-std::ostream& operator<<(std::ostream& os, const DynamicMath& obj);
 
 template<typename T>
 void	DynamicMath::parseIntegral(const T &t)

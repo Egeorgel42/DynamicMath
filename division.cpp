@@ -95,3 +95,19 @@ void	DynamicMath::division(const DynamicMath &op)
 		}
 	}
 }
+
+DynamicMath &DynamicMath::operator/=(const DynamicMath &op)
+{
+	comma = comma - op.comma;
+	decimal = decimal || op.decimal;
+	negative = negative != op.negative;
+	comma = comma + op.comma;
+	division(op);
+	return *this;
+}
+
+DynamicMath operator/(DynamicMath tmp, const DynamicMath &op)
+{
+	tmp /= op;
+	return tmp;
+}

@@ -3,10 +3,12 @@
 
 void	DynamicMath::mutiplicationBuffer(const DynamicMath &op)
 {
-	size_t i = roundUp(size * 8 - oversize0Number(data, size), 8) / 8 + roundUp(op.size * 8 - oversize0Number(op.data, op.size), 8) / 8;
-	if (i < roundUp(size * 8 - oversize0Number(data, size), 8) / 8 || i < roundUp(op.size * 8 - oversize0Number(op.data, op.size), 8) / 8)
+	size_t newsize = (size + op.size) - (roundDown(oversize0Number(data, size) + oversize0Number(op.data, size), 8) / 8);
+
+	//if newsize is smaller or equal than either the size of either class seperatly then it means size overflowed
+	if (size + op.size < size || size + op.size < op.size)
 		throw std::overflow_error("attained maximum computable size");
-	reallocData(data, size, i);
+	reallocData(data, size, newsize);
 }
 
 void	DynamicMath::multiply(const DynamicMath &op)
@@ -29,6 +31,7 @@ void	DynamicMath::multiply(const DynamicMath &op)
 				memshiftL(add_buff, size, 1);
 		}
 	}
+	free(add_buff);
 }
 
 DynamicMath &DynamicMath::operator*=(const DynamicMath &op)
@@ -44,5 +47,19 @@ DynamicMath &DynamicMath::operator*=(const DynamicMath &op)
 DynamicMath operator*(DynamicMath tmp, const DynamicMath &op)
 {
 	tmp *= op;
+	return tmp;
+}
+
+DynamicMath operator^(DynamicMath tmp, const DynamicMath &op)
+{
+	if (op.decimal)
+		throw std::logic_error("An decimal number as exponent is not supported");
+	else if (op.negative)
+		throw std::logic_error("An negative number as exponent is not supported");
+
+	DynamicMath mul = tmp;
+	tmp = 1;
+	for (DynamicMath i = op; i > 0; i--)
+		tmp *= mul;
 	return tmp;
 }

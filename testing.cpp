@@ -5,7 +5,7 @@ void 	printTest(T var)
 {
 	std::cout << "var: " << var << std::endl;
 	DynamicMath test = var;
-	test.printData();
+	std::cout << test.returnData();
 }
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
@@ -13,7 +13,7 @@ void 	printTest(T var)
 {
 	std::cout << "var: " << std::to_string(var) << std::endl;
 	DynamicMath test = var;
-	test.printData();
+	std::cout << test.returnData();
 }
 
 void testOperation(DynamicMath &nbr1, std::string operation, std::regex_token_iterator<std::string::iterator> &it)
@@ -47,7 +47,7 @@ void 	printTestChar(std::string str)
 	for (; it != end; it++)
 	{
 		testOperation(nbr1, *it, it);
-		nbr1.printData();
+		std::cout << nbr1.returnData();
 	}
 }
 
@@ -55,4 +55,7 @@ int main(int argc, char **argv)
 {
 	if (argc == 2)
 		printTestChar(argv[1]);
+	DynamicMath a = "22.2";
+	a = a.ceil();
+	std::cout << a;
 }

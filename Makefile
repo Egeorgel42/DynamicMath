@@ -5,7 +5,8 @@ DynamicUtils.cpp \
 testing.cpp \
 multiplication.cpp \
 division.cpp \
-comparaison.cpp
+comparaison.cpp \
+utils.cpp
 
 OBJ = ${SRC:.cpp=.o}
 CFLAGS = -Wall -Werror -Wextra -std=c++17 -g #-fsanitize=address

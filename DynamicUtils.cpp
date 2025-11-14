@@ -264,16 +264,17 @@ void charToBinary(std::string &str, unsigned char *data, uint64_t size)
 		str.erase(0, 1);
 }
 
-void	printBinary(unsigned char *data, size_t len)
+std::string	returnBinary(unsigned char *data, size_t len)
 {
 	std::bitset<8> x;
-	std::cout << "data: ";
+	std::string res = "data: ";
 	for (size_t i = 0; i < len; i++)
 	{
 		x = data[i];
-		std::cout << x;
+		res += x.to_string(); 
 	}
-	std::cout << std::endl;
+	res += "\n";
+	return res;
 }
 
 size_t floor(long double nbr)
@@ -294,6 +295,18 @@ size_t roundUp(size_t numToRound, size_t multiple)
         return numToRound;
 
     return numToRound + multiple - remainder;
+}
+
+size_t	roundDown(size_t numToRound, size_t multiple)
+{
+    if (multiple == 0)
+        return numToRound;
+
+    size_t remainder = numToRound % multiple;
+    if (remainder == 0)
+        return numToRound;
+
+    return numToRound - remainder;
 }
 
 

@@ -45,17 +45,6 @@ static void	parse(std::string &str, uint64_t &comma, bool &negative, bool &decim
 	}
 }
 
-void	DynamicMath::resetValues()
-{
-	negative = false;
-	decimal = false;
-	size = 0;
-	comma = 0;
-	if (data)
-		free(data);
-	data = NULL;
-}
-
 void	DynamicMath::parseString(const std::string str)
 {
 	std::string newstr = str;
@@ -74,17 +63,6 @@ void	DynamicMath::parseString(const std::string str)
 		memshift(data, size);
 }
 
-
-void	DynamicMath::printData()
-{
-	std::cout << "size: " << size << std::endl;
-	std::cout << "comma: " << comma << std::endl;
-	std::cout << "decimal: " << decimal << std::endl;
-	std::cout << "negative: " << negative << std::endl;
-	printBinary(data, size);
-	std::cout << std::endl;
-}
-
 DynamicMath &DynamicMath::operator=(const DynamicMath &cp)
 {
 	resetValues();
@@ -97,10 +75,37 @@ DynamicMath &DynamicMath::operator=(const DynamicMath &cp)
 	return *this;
 }
 
+std::string DynamicMath::toString() const
+{
+	size_t oversize = oversize0Number(data, size);
+	size_t buffer = 0;
+	size_t bufferSize = 0;
+	for (size_t i = size - 1; (i + 1) * 8 > oversize; i--)
+	{
+		for (short j = 0; j < 8 && (i + 1) * 8 - j > oversize; j++)
+		{
+			buffer += ((data[i] >> j) % 2) << bufferSize++;
+		}
+	}
+	std::string res = std::to_string(buffer);
+	if (decimal && comma >= res.size())
+	{
+		for (int i = comma - res.size(); i >= 0; i--)
+			res.insert(0, "0");
+		res.insert(1, ",");
+	}
+	else if (decimal)
+		res.insert(res.size() - comma, ",");
+	if (negative)
+		res.insert(0, "-");
+	res += "\n";
+	return res;
+}
+
+//limited to size_t for testing, rework after division is implemented
 std::ostream& operator<<(std::ostream& os, const DynamicMath& obj)
 {
-	(void)obj;
-	return os;
+	return os << obj.toString();
 }
 
 DynamicMath::DynamicMath()

@@ -1,0 +1,8 @@
+"1.2 - 2" breaks, overflows down instead of giving - 0.8 back.
+
+modulo breaks with decimal/negative? numbers.
+
+"<>=!=" operators should be different from diff
+as diff only checks for pure data instead of checking for commas and negative.
+
+make substartion only for ceil/div function.
