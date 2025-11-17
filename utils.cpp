@@ -25,11 +25,10 @@ std::string	DynamicMath::returnData()
 	return res;
 }
 
-
 DynamicMath		DynamicMath::precision() const
 {
 	DynamicMath temp = size;
-	DynamicMath Log2of10 = "0.301029995663981195213738894724";
+	DynamicMath Log2of10 = "0.301029995663981195213738894724493026768189881462108541310427461127108189274424509486927252118186172";
 
 	temp *= 8;
 	temp -= oversize0Number(data, size);
