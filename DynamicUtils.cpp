@@ -161,7 +161,7 @@ bool	addToBuffer(unsigned char *&data, size_t &size, unsigned char *add, size_t 
 	return false;
 }
 
-void	memshiftR(unsigned char *data, size_t size, size_t shiftSize)
+void	memshiftR(unsigned char *&data, size_t size, size_t shiftSize)
 {
 	if (!shiftSize)
 		return;
@@ -178,18 +178,17 @@ void	memshiftR(unsigned char *data, size_t size, size_t shiftSize)
 	bool *next_mem = new bool[shiftSize];
 	memset(mem, (int)false, shiftSize);
 	memset(next_mem, (int)false, shiftSize);
-	size--;
-	for (; size != SIZE_MAX; size--)
+	for (size_t i = 0; i < size; i++)
 	{
 		memcpy(mem, next_mem, shiftSize);
 		memset(next_mem, (int)false, shiftSize);
-		for (size_t i = 0; i < shiftSize; i++)
+		for (size_t j = 0; j < shiftSize; j++)
 		{
-			if (data[size] % 2)
-				next_mem[i] = true;
-			data[size] >>= 1;
-			if (mem[i])
-				data[size] += 128;
+			if ((data[i] >> j) % 2)
+				next_mem[j] = true;
+			data[i] >>= 1;
+			if (mem[j])
+				data[i] += 128;
 		}
 	}
 	delete[] mem;
@@ -210,7 +209,7 @@ void	memshift(unsigned char *buf, size_t len)
 	}
 }
 
-void	memshiftL(unsigned char *data, size_t size, size_t shiftSize)
+void	memshiftL(unsigned char *&data, size_t size, size_t shiftSize)
 {
 	if (!shiftSize)
 		return;
@@ -235,7 +234,7 @@ void	memshiftL(unsigned char *data, size_t size, size_t shiftSize)
 		memset(next_mem, (int)false, shiftSize);
 		for (size_t j = 0; j < shiftSize; j++)
 		{
-			if (data[size] / 128)
+			if ((data[size] >> (7 - j)) % 2)
 				next_mem[j] = true;
 			data[size] <<= 1;
 			if (mem[j])

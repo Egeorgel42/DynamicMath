@@ -63,9 +63,9 @@ DynamicMath &DynamicMath::operator++()
 /// @brief used for ceil/floor to divide by the number of trailling decimal after the comma
 /// @param div is equal to 10^X
 /// @return a new DynamicMath object
-DynamicMath DynamicMath::divNoRem(DynamicMath div)
+DynamicMath DynamicMath::divNoRem(DynamicMath div, bool &pureDividend) const
 {
-	if (div > *this)
+	if (diff(div.data, div.size, this->data, this->size) == -1)
 		return 0;
 
 	DynamicMath buff = *this;
@@ -83,9 +83,10 @@ DynamicMath DynamicMath::divNoRem(DynamicMath div)
 	reallocData(div.data, div.size, size);
 	for (DynamicMath i = sizeBuff - divSizeBuff; i > 0; i--) //horrible perfomance but im short on patience
 		memshiftL(div.data, div.size, 1);
+	buff.comma = 0;
 	for (DynamicMath i = sizeBuff; i >= divSizeBuff; i--)
 	{
-		if (buff < div)
+		if (diff(buff.data, buff.size, div.data, div.size) == 1)
 			memshiftL(res.data, res.size, 1);
 		else
 		{
@@ -95,18 +96,34 @@ DynamicMath DynamicMath::divNoRem(DynamicMath div)
 		}
 		memshiftR(div.data, div.size, 1);
 	}
+	if (buff == 0)
+		pureDividend = true;
 	return res;
 }
 
-DynamicMath	DynamicMath::ceil()
+DynamicMath	DynamicMath::dCeil() const
 {
+	if (!decimal)
+		return *this;
 	DynamicMath res;
-	if (decimal)
-	{
-		DynamicMath ceilSize = 10;
-		ceilSize = ceilSize^comma;
-		res = this->divNoRem(ceilSize);
+	DynamicMath divSize = 10;
+	bool pureDiv = false;
+
+	divSize = divSize^comma;
+	res = this->divNoRem(divSize, pureDiv);
+	if (!pureDiv)
 		res++;
-	}
 	return res;
+}
+
+DynamicMath	DynamicMath::dFloor() const
+{
+	if (!decimal)
+		return *this;
+	DynamicMath res;
+	DynamicMath divSize = 10;
+	bool pureDiv = false;
+
+	divSize = divSize^comma;
+	return this->divNoRem(divSize, pureDiv);
 }

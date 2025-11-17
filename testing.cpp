@@ -55,7 +55,4 @@ int main(int argc, char **argv)
 {
 	if (argc == 2)
 		printTestChar(argv[1]);
-	DynamicMath a = "22.2";
-	a = a.ceil();
-	std::cout << a;
 }

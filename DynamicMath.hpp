@@ -67,6 +67,7 @@ friend bool operator< (const DynamicMath& lhs, const DynamicMath& rhs); \
 friend bool operator> (const DynamicMath& lhs, const DynamicMath& rhs); \
 friend bool operator<= (const DynamicMath& lhs, const DynamicMath& rhs); \
 friend bool operator>= (const DynamicMath& lhs, const DynamicMath& rhs); \
+friend bool operator== (const DynamicMath& lhs, const DynamicMath& rhs); \
 friend std::ostream& operator<<(std::ostream& os, const DynamicMath& obj);
 
 class DynamicMath
@@ -82,12 +83,13 @@ class DynamicMath
 		void			parseIntegral(const T &t);
 		void			parseString(const std::string str);
 		DynamicMath		precision();
-		DynamicMath		divNoRem(DynamicMath div);
+		DynamicMath		divNoRem(DynamicMath div, bool &pureDividend) const;
 	public:
 		CONSTRUCTORS
 		ASSIGN_OPERATOR
 		OPERATIONS
-		DynamicMath	ceil();
+		DynamicMath	dCeil() const;
+		DynamicMath	dFloor() const;
 		std::string	returnData();
 		std::string	toString() const;
 };
