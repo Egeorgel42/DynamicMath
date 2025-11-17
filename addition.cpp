@@ -20,6 +20,8 @@ void	DynamicMath::add(const DynamicMath &op)
 	}
 	else
 		buff = op.data;
+	if (size < buff_size)
+		reallocData(data, size, buff_size);
 	if (comma < op.comma || negative)
 	{
 		if (negative && op.negative && oversize0Number(data, size) == 0)
@@ -32,8 +34,6 @@ void	DynamicMath::add(const DynamicMath &op)
 		if (negative)
 			complement(data, size);
 	}
-	if (size < buff_size)
-		reallocData(data, size, buff_size);
 	bool res = addToBuffer(data, size, buff, buff_size, negative || op.negative, op.negative);
 	if ((!res && negative != op.negative) || (res && negative && op.negative))
 	{
