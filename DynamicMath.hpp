@@ -82,7 +82,7 @@ class DynamicMath
 		template<typename T>
 		void			parseIntegral(const T &t);
 		void			parseString(const std::string str);
-		DynamicMath		precision();
+		DynamicMath		precision() const;
 		DynamicMath		divNoRem(DynamicMath div, bool &pureDividend) const;
 	public:
 		CONSTRUCTORS
